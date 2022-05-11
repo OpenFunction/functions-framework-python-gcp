@@ -418,17 +418,17 @@ def test_error_paths(path):
 
 
 @pytest.mark.parametrize(
-    "target, source, signature_type",
-    [(None, None, None), (pretend.stub(), pretend.stub(), pretend.stub())],
+    "target, source, signature_type, func_context, debug",
+    [(None, None, None, None, False), (pretend.stub(), pretend.stub(), pretend.stub(), pretend.stub(), pretend.stub())],
 )
-def test_lazy_wsgi_app(monkeypatch, target, source, signature_type):
+def test_lazy_wsgi_app(monkeypatch, target, source, signature_type, func_context, debug):
     actual_app_stub = pretend.stub()
     wsgi_app = pretend.call_recorder(lambda *a, **kw: actual_app_stub)
     create_app = pretend.call_recorder(lambda *a: wsgi_app)
     monkeypatch.setattr(functions_framework, "create_app", create_app)
 
     # Test that it's lazy
-    lazy_app = LazyWSGIApp(target, source, signature_type)
+    lazy_app = LazyWSGIApp(target, source, signature_type, func_context, debug)
 
     assert lazy_app.app == None
 
@@ -439,7 +439,7 @@ def test_lazy_wsgi_app(monkeypatch, target, source, signature_type):
     app = lazy_app(*args, **kwargs)
 
     assert app == actual_app_stub
-    assert create_app.calls == [pretend.call(target, source, signature_type)]
+    assert create_app.calls == [pretend.call(target, source, signature_type, func_context, debug)]
     assert wsgi_app.calls == [pretend.call(*args, **kwargs)]
 
     # Test that it's only initialized once

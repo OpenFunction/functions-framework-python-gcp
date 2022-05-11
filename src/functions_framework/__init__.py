@@ -34,6 +34,8 @@ from functions_framework.exceptions import (
     MissingSourceException,
 )
 from google.cloud.functions.context import Context
+from openfunction.dapr_output_middleware import dapr_output_middleware
+from openfunction.async_server import AsyncApp
 
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024
 
@@ -92,6 +94,11 @@ def setup_logging():
     warn_handler = logging.StreamHandler(sys.stderr)
     warn_handler.setLevel(logging.WARNING)
     logging.getLogger().addHandler(warn_handler)
+
+
+def setup_logging_level(debug):
+    if debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
 
 def _http_view_func_wrapper(function, request):
@@ -175,7 +182,7 @@ def _event_view_func_wrapper(function, request):
     return view_func
 
 
-def _configure_app(app, function, signature_type):
+def _configure_app(app, function, signature_type, func_context):
     # Mount the function at the root. Support GCF's default path behavior
     # Modify the url_map and view_functions directly here instead of using
     # add_url_rule in order to create endpoints that route all methods
@@ -189,6 +196,7 @@ def _configure_app(app, function, signature_type):
         app.view_functions["run"] = _http_view_func_wrapper(function, flask.request)
         app.view_functions["error"] = lambda: flask.abort(404, description="Not Found")
         app.after_request(read_request)
+        app.after_request(dapr_output_middleware(func_context))
     elif signature_type == _function_registry.BACKGROUNDEVENT_SIGNATURE_TYPE:
         app.url_map.add(
             werkzeug.routing.Rule(
@@ -241,8 +249,31 @@ def crash_handler(e):
     """
     return str(e), 500, {_FUNCTION_STATUS_HEADER_FIELD: _CRASH}
 
+def create_async_app(target=None, source=None, func_context=None, debug=False):
+    target = _function_registry.get_function_target(target)
+    source = _function_registry.get_function_source(source)
 
-def create_app(target=None, source=None, signature_type=None):
+    if not os.path.exists(source):
+        raise MissingSourceException(
+            "File {source} that is expected to define function doesn't exist".format(
+                source=source
+            )
+        )
+
+    source_module, spec = _function_registry.load_function_module(source)
+    spec.loader.exec_module(source_module)
+
+    function = _function_registry.get_user_function(source, source_module, target)
+
+    setup_logging_level(debug)
+
+    async_app = AsyncApp(func_context)
+    async_app.bind(function)
+
+    return async_app.app
+
+
+def create_app(target=None, source=None, signature_type=None, func_context=None, debug=False):
     target = _function_registry.get_function_target(target)
     source = _function_registry.get_function_source(source)
 
@@ -282,6 +313,8 @@ def create_app(target=None, source=None, signature_type=None):
         sys.stdout = _LoggingHandler("INFO", sys.stderr)
         sys.stderr = _LoggingHandler("ERROR", sys.stderr)
         setup_logging()
+        
+    setup_logging_level(debug)
 
     # Execute the module, within the application context
     with _app.app_context():
@@ -291,7 +324,7 @@ def create_app(target=None, source=None, signature_type=None):
     signature_type = _function_registry.get_func_signature_type(target, signature_type)
     function = _function_registry.get_user_function(source, source_module, target)
 
-    _configure_app(_app, function, signature_type)
+    _configure_app(_app, function, signature_type, func_context)
 
     return _app
 
@@ -302,7 +335,7 @@ class LazyWSGIApp:
     at import-time
     """
 
-    def __init__(self, target=None, source=None, signature_type=None):
+    def __init__(self, target=None, source=None, signature_type=None, func_context=None, debug=False):
         # Support HTTP frameworks which support WSGI callables.
         # Note: this ability is currently broken in Gunicorn 20.0, and
         # environment variables should be used for configuration instead:
@@ -310,13 +343,15 @@ class LazyWSGIApp:
         self.target = target
         self.source = source
         self.signature_type = signature_type
+        self.func_context = func_context
+        self.debug = debug
 
         # Placeholder for the app which will be initialized on first call
         self.app = None
 
     def __call__(self, *args, **kwargs):
         if not self.app:
-            self.app = create_app(self.target, self.source, self.signature_type)
+            self.app = create_app(self.target, self.source, self.signature_type, self.func_context, self.debug)
         return self.app(*args, **kwargs)
 
 

@@ -5,15 +5,17 @@
 [![Python unit CI][ff_python_unit_img]][ff_python_unit_link] [![Python lint CI][ff_python_lint_img]][ff_python_lint_link] [![Python conformace CI][ff_python_conformance_img]][ff_python_conformance_link]
 
 An open source FaaS (Function as a service) framework for writing portable
-Python functions -- brought to you by the Google Cloud Functions team.
+Python functions.
 
 The Functions Framework lets you write lightweight functions that run in many
 different environments, including:
 
+*   [OpenFunction](https://github.com/OpenFunction/OpenFunction)
+*   [Knative](https://github.com/knative/)-based environments
+*   [Dapr](https://dapr.io/)-based environments
 *   [Google Cloud Functions](https://cloud.google.com/functions/)
 *   Your local development machine
 *   [Cloud Run and Cloud Run for Anthos](https://cloud.google.com/run/)
-*   [Knative](https://github.com/knative/)-based environments
 
 The framework allows you to go from:
 
@@ -291,6 +293,22 @@ https://cloud.google.com/functions/docs/tutorials/pubsub#functions_helloworld_pu
         # Output: Hello World!
 
 ## Run your function on serverless platforms
+
+### Container environments based on Knative
+
+The Functions Framework is designed to be compatible with Knative environments. Build and deploy your container to a Knative environment.
+
+### OpenFunction
+
+![OpenFunction Platform Overview](https://openfunction.dev/openfunction-0.5-architecture.png)
+
+Besides Knative function support, one notable feature of OpenFunction is embracing Dapr system, so far Dapr pub/sub and bindings have been support.
+
+Dapr bindings allows you to trigger your applications or services with events coming in from external systems, or interface with external systems. OpenFunction [0.6.0 release](https://openfunction.dev/blog/2022/03/25/announcing-openfunction-0.6.0-faas-observability-http-trigger-and-more/) adds Dapr output bindings to its synchronous functions which enables HTTP triggers for asynchronous functions. For example, synchronous functions backed by the Knative runtime can now interact with middlewares defined by Dapr output binding or pub/sub, and an asynchronous function will be triggered by the events sent from the synchronous function.
+
+Asynchronous function introduces Dapr pub/sub to provide a platform-agnostic API to send and receive messages. A typical use case is that you can leverage synchronous functions to receive an event in plain JSON or Cloud Events format, and then send the received event to a Dapr output binding or pub/sub component, most likely a message queue (e.g. Kafka, NATS Streaming, GCP PubSub, MQTT). Finally, the asynchronous function could be triggered from the message queue.
+
+More details would be brought up to you in some quickstart samples, stay tuned.
 
 ### Google Cloud Functions
 

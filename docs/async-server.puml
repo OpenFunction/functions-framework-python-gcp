@@ -1,0 +1,59 @@
+@startuml Async Server
+
+box Function Process in Local Environment or Container
+control ENTRYPOINT
+participant "~__main__" as Main
+participant AsyncServer
+participant DaprServer
+participant gRPCServer [
+  Web Server
+  ----
+  ""gprc.server""
+]
+end box
+
+entity "Dapr Sidecar " as DaprSidecar
+
+== OpenFunction Serving ==
+
+ENTRYPOINT -> Main ** : execute
+note over ENTRYPOINT, Main: Pass through __CLI arguments__ and \ncontainer __environment variables__
+
+Main -> Main : load user function file
+note left: ""function (ctx, data) {}""
+
+Main -> AsyncServer ** : create
+note over Main, AsyncServer: Hand over __user function__ and __context__
+
+AsyncServer -> DaprServer ** : ""new""
+note over AsyncServer, DaprServer: Extract __port__ from __context__ and pass down
+
+DaprServer -> gRPCServer ** : ""new""
+|||
+DaprServer --> DaprSidecar : Waiting till Dapr sidecar started
+...
+AsyncServer -> DaprServer : register __user function__ as handler \nfor each of __inputs__ in __context__
+DaprServer -> gRPCServer : add routes for Dapr style \nsubscriptions and input bindings
+
+...
+
+== OpenFunction Triggering ==
+
+DaprSidecar <-- : sub / input data
+
+DaprSidecar -> gRPCServer ++ : Dapr request with "data"
+
+gRPCServer -> gRPCServer ++ : invoke user function
+
+alt 
+  gRPCServer -> DaprSidecar ++ : publish data or invoke output binding
+  DaprSidecar --> gRPCServer -- : execution result
+end
+
+return
+
+return server app response
+
+...
+
+@enduml

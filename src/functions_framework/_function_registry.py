@@ -15,6 +15,7 @@ import importlib.util
 import os
 import sys
 import types
+import json
 
 from functions_framework.exceptions import (
     InvalidConfigurationException,
@@ -22,9 +23,12 @@ from functions_framework.exceptions import (
     MissingTargetException,
 )
 
+from openfunction.function_context import FunctionContext
+
 DEFAULT_SOURCE = os.path.realpath("./main.py")
 
 FUNCTION_SIGNATURE_TYPE = "FUNCTION_SIGNATURE_TYPE"
+FUNC_CONTEXT = "FUNC_CONTEXT"
 HTTP_SIGNATURE_TYPE = "http"
 CLOUDEVENT_SIGNATURE_TYPE = "cloudevent"
 BACKGROUNDEVENT_SIGNATURE_TYPE = "event"
@@ -115,3 +119,17 @@ def get_func_signature_type(func_name: str, signature_type: str) -> str:
     if os.environ.get("ENTRY_POINT"):
         os.environ["FUNCTION_TRIGGER_TYPE"] = sig_type
     return sig_type
+
+
+def get_openfunction_context(func_context: str) -> FunctionContext:
+    """Get openfunction context"""
+    context_str = (
+        func_context
+        or os.environ.get(FUNC_CONTEXT)
+    )
+
+    if context_str:
+        context = FunctionContext.from_json(json.loads(context_str))
+        return context
+   
+    return None

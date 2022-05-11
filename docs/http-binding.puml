@@ -1,0 +1,73 @@
+@startuml HTTP Binding
+
+box Function Process in Local Environment or Container
+control ENTRYPOINT
+participant "~__main__" as Main
+participant HTTPServer
+participant Server [
+  Web Server
+  ----
+  ""Flask/Gunicorn""
+]
+participant Middleware
+participant "User Function" as UserFunction
+participant DaprClient
+end box
+
+entity "Dapr Sidecar " as DaprSidecar
+
+== OpenFunction Serving ==
+
+ENTRYPOINT -> Main ** : execute
+note over ENTRYPOINT, Main: Pass through __CLI arguments__ and \ncontainer __environment variables__
+
+Main -> Main : load user fnction file
+note left: ""function (request) {}"" 
+
+Main -> HTTPServer ** : create
+note over Main, HTTPServer: Hand over __user function__, __function type__ \nand __context__ parsed from env variables 
+
+HTTPServer -> Server ** : new
+note over Server: Depend on debug mode
+
+HTTPServer -> Middleware ** : new
+HTTPServer -> Server : use Middleware
+note over HTTPServer, Server: Pass context to middleware
+|||
+HTTPServer -> Server : use others middlewares
+|||
+HTTPServer -> UserFunction ** : wrap user function
+note over HTTPServer, UserFunction: Register as HTTP or CloudEvent Function 
+HTTPServer -> Server : bind wrapper to "/*" route
+
+...
+
+== OpenFunction Invocation ==
+
+[-> Server ++ : HTTP request to "/"
+
+Server -> UserFunction ++ : execute user function
+UserFunction --> Server -- : return execution result "data"
+
+alt ""runtime"" = ""knative"" and ""outputs"" is not empty
+  Server -> Middleware ++ : invoke Middleware
+
+  Middleware -> DaprClient ** : new
+
+  loop each OpenFunction Output 
+    Middleware -> DaprClient ++ : send "data"
+
+    DaprClient -> DaprSidecar ++ : invoke binding or publication with "data"
+    DaprSidecar --> DaprClient -- : return result 
+
+    DaprClient --> Middleware -- : forward result
+  end
+
+  Middleware --> Server -- : return "data" as response
+end
+
+[<- Server -- : send response
+
+...
+
+@enduml

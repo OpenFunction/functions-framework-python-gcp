@@ -25,13 +25,13 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="functions-framework",
-    version="3.0.0",
-    description="An open source FaaS (Function as a service) framework for writing portable Python functions -- brought to you by the Google Cloud Functions team.",
+    version="3.1.0",
+    description="An open source FaaS (Function as a service) framework for writing portable Python functions.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/googlecloudplatform/functions-framework-python",
-    author="Google LLC",
-    author_email="googleapis-packages@google.com",
+    url="https://github.com/OpenFunction/functions-framework-python",
+    author="OpenFunction",
+    author_email="openfunction@kubesphere.io",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
@@ -55,6 +55,7 @@ setup(
         "watchdog>=1.0.0,<2.0.0",
         "gunicorn>=19.2.0,<21.0; platform_system!='Windows'",
         "cloudevents>=1.2.0,<2.0.0",
+        "dapr>=1.6.0",
     ],
     entry_points={
         "console_scripts": [

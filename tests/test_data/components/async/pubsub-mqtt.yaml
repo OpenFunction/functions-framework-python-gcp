@@ -1,0 +1,12 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub-mqtt
+spec:
+  type: pubsub.mqtt
+  version: v1
+  metadata:
+  # - name: consumerID
+  #   value: "{uuid}"
+  - name: url
+    value: "tcp://broker.emqx.io:1883"

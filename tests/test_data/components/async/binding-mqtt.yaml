@@ -1,0 +1,14 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: binding-mqtt
+spec:
+  type: bindings.mqtt
+  version: v1
+  metadata:
+  - name: consumerID
+    value: "{uuid}"
+  - name: url
+    value: "tcp://broker.emqx.io:1883"
+  - name: topic
+    value: "of-async-default"

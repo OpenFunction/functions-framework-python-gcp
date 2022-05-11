@@ -16,9 +16,11 @@ import os
 
 import click
 
-from functions_framework import create_app
+from functions_framework import create_app, create_async_app
 from functions_framework._http import create_server
+from functions_framework import _function_registry
 
+from openfunction.function_context import ASYNC_RUNTIME_TYPE
 
 @click.command()
 @click.option("--target", envvar="FUNCTION_TARGET", type=click.STRING, required=True)
@@ -34,10 +36,24 @@ from functions_framework._http import create_server
 @click.option("--debug", envvar="DEBUG", is_flag=True)
 @click.option("--dry-run", envvar="DRY_RUN", is_flag=True)
 def _cli(target, source, signature_type, host, port, debug, dry_run):
-    app = create_app(target, source, signature_type)
-    if dry_run:
-        click.echo("Function: {}".format(target))
-        click.echo("URL: http://{}:{}/".format(host, port))
-        click.echo("Dry run successful, shutting down.")
+    context = _function_registry.get_openfunction_context(None)
+    
+    # determine if async or knative
+    if context and context.runtime == ASYNC_RUNTIME_TYPE:
+        app = create_async_app(target, source, context, debug)
+        if dry_run:
+            run_dry(target, host, port)
+        else:
+            app.run(context.port)
     else:
-        create_server(app, debug).run(host, port)
+        app = create_app(target, source, signature_type, context, debug)
+        if dry_run:
+            run_dry(target, host, port)
+        else:
+            create_server(app, debug).run(host, port)
+
+
+def run_dry(target, host, port):
+    click.echo("Function: {}".format(target))
+    click.echo("URL: http://{}:{}/".format(host, port))
+    click.echo("Dry run successful, shutting down.")
