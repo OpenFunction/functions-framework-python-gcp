@@ -1,12 +1,11 @@
 import logging
 
-from openfunction.function_context import KNATIVE_RUNTIME_TYPE
 from openfunction.function_runtime import OpenFunctionRuntime
 
 def dapr_output_middleware(context):
     """Flask middleware for output binding."""
     def dapr_output_middleware(response):
-        if not context or not context.outputs or context.runtime != KNATIVE_RUNTIME_TYPE:
+        if not context or not context.outputs or not context.is_runtime_knative():
             return response
         
         runtime = OpenFunctionRuntime.parse(context)

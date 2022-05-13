@@ -20,8 +20,6 @@ from functions_framework import create_app, create_async_app
 from functions_framework._http import create_server
 from functions_framework import _function_registry
 
-from openfunction.function_context import ASYNC_RUNTIME_TYPE
-
 @click.command()
 @click.option("--target", envvar="FUNCTION_TARGET", type=click.STRING, required=True)
 @click.option("--source", envvar="FUNCTION_SOURCE", type=click.Path(), default=None)
@@ -39,7 +37,7 @@ def _cli(target, source, signature_type, host, port, debug, dry_run):
     context = _function_registry.get_openfunction_context(None)
     
     # determine if async or knative
-    if context and context.runtime == ASYNC_RUNTIME_TYPE:
+    if context and context.is_runtime_async():
         app = create_async_app(target, source, context, debug)
         if dry_run:
             run_dry(target, host, port)

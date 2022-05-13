@@ -1,8 +1,8 @@
 OPEN_FUNC_BINDING = "bindings"
 OPEN_FUNC_TOPIC = "pubsub"
 
-KNATIVE_RUNTIME_TYPE = "Knative"
-ASYNC_RUNTIME_TYPE = "Async"
+KNATIVE_RUNTIME_TYPE = "knative"
+ASYNC_RUNTIME_TYPE = "async"
 
 
 class FunctionContext(object):
@@ -15,6 +15,12 @@ class FunctionContext(object):
         self.inputs = inputs
         self.outputs = outputs
         self.port = port
+
+    def is_runtime_async(self):
+        return self.runtime.lower() == ASYNC_RUNTIME_TYPE
+
+    def is_runtime_knative(self):
+        return self.runtime.lower() == KNATIVE_RUNTIME_TYPE
 
     @staticmethod
     def from_json(json_dct):
@@ -71,9 +77,9 @@ class Component(object):
 
     @staticmethod
     def from_json(json_dct):
-        uri = json_dct.get('uri') or ''
-        component_name = json_dct.get('componentName') or ''
+        uri = json_dct.get('uri', '')
+        component_name = json_dct.get('componentName', '')
         metadata = json_dct.get('metadata')
-        component_type = json_dct.get('componentType') or ''
-        operation = json_dct.get('operation') or ''
+        component_type = json_dct.get('componentType', '')
+        operation = json_dct.get('operation', '')
         return Component(uri, component_name, component_type, metadata, operation)
