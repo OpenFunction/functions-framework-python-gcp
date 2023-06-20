@@ -1,6 +1,6 @@
 import logging
 
-from openfunction.function_runtime import OpenFunctionRuntime
+from functions_framework.openfunction.function_runtime import OpenFunctionRuntime
 
 def dapr_output_middleware(context):
     """Flask middleware for output binding."""

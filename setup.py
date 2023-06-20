@@ -46,16 +46,17 @@ setup(
     ],
     keywords="functions-framework",
     packages=find_packages(where="src"),
-    namespace_packages=["google", "google.cloud"],
     package_dir={"": "src"},
     python_requires=">=3.5, <4",
     install_requires=[
+        "grpcio==1.54.2",
         "flask>=1.0,<3.0",
         "click>=7.0,<9.0",
-        "watchdog>=1.0.0,<2.0.0",
+        # "watchdog>=1.0.0,<2.0.0",
         "gunicorn>=19.2.0,<21.0; platform_system!='Windows'",
         "cloudevents>=1.2.0,<2.0.0",
-        "dapr>=1.6.0",
+        "dapr>=1.10.0",
+        "aiohttp==3.8.4",
     ],
     entry_points={
         "console_scripts": [

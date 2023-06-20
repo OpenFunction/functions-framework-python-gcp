@@ -4,7 +4,7 @@ import os
 from dapr.clients import DaprGrpcClient
 from dapr.conf import settings
 
-from openfunction.function_context import FunctionContext
+from functions_framework.context.function_context import FunctionContext
 
 DAPR_GRPC_PORT = "DAPR_GRPC_PORT"
 OPEN_FUNC_BINDING = "bindings"

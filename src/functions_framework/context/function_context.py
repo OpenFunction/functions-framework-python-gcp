@@ -8,27 +8,33 @@ ASYNC_RUNTIME_TYPE = "async"
 class FunctionContext(object):
     """OpenFunction's serving context."""
     
-    def __init__(self, name="", version="", runtime="", inputs=None, outputs=None, port=8080):
+    def __init__(self, name="", version="", dapr_triggers=None, http_trigger=None,
+                 inputs=None, outputs=None, states=None,
+                 pre_hooks=None, post_hooks=None, tracing=None, port=8080):
         self.name = name
         self.version = version
-        self.runtime = runtime
+        self.dapr_triggers = dapr_triggers
+        self.http_trigger = http_trigger
         self.inputs = inputs
         self.outputs = outputs
+        self.states = states
+        self.pre_hooks = pre_hooks
+        self.post_hooks = post_hooks
+        self.tracing = tracing
         self.port = port
-
-    def is_runtime_async(self):
-        return self.runtime.lower() == ASYNC_RUNTIME_TYPE
-
-    def is_runtime_knative(self):
-        return self.runtime.lower() == KNATIVE_RUNTIME_TYPE
 
     @staticmethod
     def from_json(json_dct):
         name = json_dct.get('name')
         version = json_dct.get('version')
-        runtime = json_dct.get('runtime')
         inputs_list = json_dct.get('inputs')
         outputs_list = json_dct.get('outputs')
+        dapr_triggers = json_dct.get('triggers', {}).get('dapr', [])
+        http_trigger = json_dct.get('triggers', {}).get('http', None)
+        states = json_dct.get('states', {})
+        pre_hooks = json_dct.get('pre_hooks', [])
+        post_hooks = json_dct.get('post_hooks', [])
+        tracing = json_dct.get('tracing', {})
 
         inputs = None
         if inputs_list:
@@ -43,8 +49,8 @@ class FunctionContext(object):
             for k, v in outputs_list.items():
                 output = Component.from_json(v)
                 outputs[k] = output
-                
-        return FunctionContext(name, version, runtime, inputs, outputs)
+        return FunctionContext(name, version, dapr_triggers, http_trigger,
+                               inputs, outputs, states, pre_hooks, post_hooks, tracing)
 
 
 class Component(object):
@@ -83,3 +89,18 @@ class Component(object):
         component_type = json_dct.get('componentType', '')
         operation = json_dct.get('operation', '')
         return Component(uri, component_name, component_type, metadata, operation)
+
+
+class OpenFunctionTrigger(object):
+
+    def __init__(self, name, component_type, topic):
+        self.name = name
+        self.component_type = component_type
+        self.topic = topic
+
+    @staticmethod
+    def from_json(json_dct):
+        name = json_dct.get('name', '')
+        component_type = json_dct.get('type', '')
+        topic = json_dct.get('topic')
+        return OpenFunctionTrigger(name, component_type, topic)

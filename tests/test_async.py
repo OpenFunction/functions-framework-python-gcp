@@ -1,5 +1,4 @@
 import random
-import pathlib
 import json
 import subprocess
 import threading
@@ -10,8 +9,8 @@ import pytest
 
 from paho.mqtt import client as mqtt_client
 
-from openfunction.function_context import FunctionContext
-from openfunction.async_server import AsyncApp
+from functions_framework.openfunction import FunctionContext
+from functions_framework.openfunction import AsyncApp
 
 TEST_PAYLOAD = {"data": "hello world"}
 APP_ID="async.dapr"

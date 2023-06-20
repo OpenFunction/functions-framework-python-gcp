@@ -30,7 +30,7 @@ def function(cloud_event):
     """
     data = {
         "message": {
-            "@type": "type.googleapis.com/google.pubsub.v1.PubsubMessage",
+            "@type": "type.googleapis.com/google_origin.pubsub.v1.PubsubMessage",
             "attributes": {
                 "attr1": "attr1-value",
             },
@@ -45,7 +45,7 @@ def function(cloud_event):
         and cloud_event.data == data
         and cloud_event["source"]
         == "//pubsub.googleapis.com/projects/sample-project/topics/gcf-test"
-        and cloud_event["type"] == "google.cloud.pubsub.topic.v1.messagePublished"
+        and cloud_event["type"] == "google_origin.cloud.pubsub.topic.v1.messagePublished"
         and cloud_event["time"] == "2020-09-29T11:32:00.000Z"
     )
 

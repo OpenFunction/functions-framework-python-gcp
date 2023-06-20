@@ -573,14 +573,14 @@ def test_errorhandler(monkeypatch):
 @pytest.mark.parametrize(
     "event_type",
     [
-        "google.cloud.firestore.document.v1.written",
-        "google.cloud.pubsub.topic.v1.messagePublished",
-        "google.cloud.storage.object.v1.finalized",
-        "google.cloud.storage.object.v1.metadataUpdated",
-        "google.firebase.analytics.log.v1.written",
-        "google.firebase.auth.user.v1.created",
-        "google.firebase.auth.user.v1.deleted",
-        "google.firebase.database.ref.v1.written",
+        "google_origin.cloud.firestore.document.v1.written",
+        "google_origin.cloud.pubsub.topic.v1.messagePublished",
+        "google_origin.cloud.storage.object.v1.finalized",
+        "google_origin.cloud.storage.object.v1.metadataUpdated",
+        "google_origin.firebase.analytics.log.v1.written",
+        "google_origin.firebase.auth.user.v1.created",
+        "google_origin.firebase.auth.user.v1.deleted",
+        "google_origin.firebase.database.ref.v1.written",
     ],
 )
 def tests_cloud_to_background_event_client(
@@ -598,7 +598,7 @@ def tests_cloud_to_background_event_client(
 def tests_cloud_to_background_event_client_invalid_source(
     background_event_client, create_ce_headers, tempfile_payload
 ):
-    headers = create_ce_headers("google.cloud.firestore.document.v1.written")
+    headers = create_ce_headers("google_origin.cloud.firestore.document.v1.written")
     headers["ce-source"] = "invalid"
 
     resp = background_event_client.post("/", headers=headers, json=tempfile_payload)

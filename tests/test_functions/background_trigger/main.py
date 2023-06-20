@@ -27,7 +27,7 @@ def function(
       event: The event data (as dictionary) which triggered this background
         function. Must contain entries for 'value' and 'filename' keys in the
         data dictionary.
-      context (google.cloud.functions.Context): The Cloud Functions event context.
+      context (google_origin.cloud.functions.Context): The Cloud Functions event context.
     """
     filename = event["filename"]
     value = event["value"]

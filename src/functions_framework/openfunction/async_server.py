@@ -1,7 +1,7 @@
-from dapr.ext.grpc import App, BindingRequest
+from dapr.aio.grpc import App, BindingRequest
 from cloudevents.sdk.event import v1
-from openfunction.function_context import OPEN_FUNC_BINDING, OPEN_FUNC_TOPIC
-from openfunction.function_runtime import OpenFunctionRuntime
+from functions_framework.context.function_context import OPEN_FUNC_BINDING, OPEN_FUNC_TOPIC
+from functions_framework.openfunction.function_runtime import OpenFunctionRuntime
 
 class AsyncApp(object):
     """Init async server with dapr server."""

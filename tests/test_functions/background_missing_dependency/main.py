@@ -25,7 +25,7 @@ def function(event, context):
 
     Args:
       event: The event data which triggered this background function.
-      context (google.cloud.functions.Context): The Cloud Functions event context.
+      context (google_origin.cloud.functions.Context): The Cloud Functions event context.
     """
     del event
     del context

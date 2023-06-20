@@ -22,7 +22,7 @@ from cloudevents.http import from_json, to_binary
 
 from functions_framework import event_conversion
 from functions_framework.exceptions import EventConversionException
-from google.cloud.functions.context import Context
+from google_origin.cloud.functions.context import Context
 
 TEST_DATA_DIR = pathlib.Path(__file__).resolve().parent / "test_data"
 
@@ -31,11 +31,11 @@ PUBSUB_BACKGROUND_EVENT = {
     "context": {
         "eventId": "1215011316659232",
         "timestamp": "2020-05-18T12:13:19Z",
-        "eventType": "google.pubsub.topic.publish",
+        "eventType": "google_origin.pubsub.topic.publish",
         "resource": {
             "service": "pubsub.googleapis.com",
             "name": "projects/sample-project/topics/gcf-test",
-            "type": "type.googleapis.com/google.pubsub.v1.PubsubMessage",
+            "type": "type.googleapis.com/google_origin.pubsub.v1.PubsubMessage",
         },
     },
     "data": {
@@ -71,7 +71,7 @@ PUBSUB_CLOUD_EVENT = {
     "id": "1215011316659232",
     "source": "//pubsub.googleapis.com/projects/sample-project/topics/gcf-test",
     "time": "2020-05-18T12:13:19Z",
-    "type": "google.cloud.pubsub.topic.v1.messagePublished",
+    "type": "google_origin.cloud.pubsub.topic.v1.messagePublished",
     "datacontenttype": "application/json",
     "data": {
         "message": {
@@ -104,17 +104,17 @@ def raw_pubsub_request():
 def marshalled_pubsub_request():
     return {
         "data": {
-            "@type": "type.googleapis.com/google.pubsub.v1.PubsubMessage",
+            "@type": "type.googleapis.com/google_origin.pubsub.v1.PubsubMessage",
             "data": "eyJmb28iOiJiYXIifQ==",
             "attributes": {"test": "123"},
         },
         "context": {
             "eventId": "1215011316659232",
-            "eventType": "google.pubsub.topic.publish",
+            "eventType": "google_origin.pubsub.topic.publish",
             "resource": {
                 "name": "projects/sample-project/topics/gcf-test",
                 "service": "pubsub.googleapis.com",
-                "type": "type.googleapis.com/google.pubsub.v1.PubsubMessage",
+                "type": "type.googleapis.com/google_origin.pubsub.v1.PubsubMessage",
             },
             "timestamp": "2021-04-17T07:21:18.249Z",
         },
@@ -277,7 +277,7 @@ def test_marshal_background_event_data_bad_request():
 )
 def test_split_resource(background_resource):
     context = Context(
-        eventType="google.storage.object.finalize", resource=background_resource
+        eventType="google_origin.storage.object.finalize", resource=background_resource
     )
     service, resource, subject = event_conversion._split_resource(context)
     assert service == "storage.googleapis.com"
@@ -320,7 +320,7 @@ def test_split_resource_no_resource_regex_match():
         "type": "storage#object",
     }
     context = Context(
-        eventType="google.storage.object.finalize", resource=background_resource
+        eventType="google_origin.storage.object.finalize", resource=background_resource
     )
     with pytest.raises(EventConversionException) as exc_info:
         event_conversion._split_resource(context)
@@ -412,25 +412,25 @@ def test_pubsub_emulator_request_with_invalid_message(
     "ce_event_type, ce_source, expected_type, expected_resource",
     [
         (
-            "google.firebase.database.ref.v1.written",
+            "google_origin.firebase.database.ref.v1.written",
             "//firebasedatabase.googleapis.com/projects/_/instances/my-project-id",
-            "providers/google.firebase.database/eventTypes/ref.write",
+            "providers/google_origin.firebase.database/eventTypes/ref.write",
             "projects/_/instances/my-project-id/my/subject",
         ),
         (
-            "google.cloud.pubsub.topic.v1.messagePublished",
+            "google_origin.cloud.pubsub.topic.v1.messagePublished",
             "//pubsub.googleapis.com/projects/sample-project/topics/gcf-test",
-            "google.pubsub.topic.publish",
+            "google_origin.pubsub.topic.publish",
             {
                 "service": "pubsub.googleapis.com",
                 "name": "projects/sample-project/topics/gcf-test",
-                "type": "type.googleapis.com/google.pubsub.v1.PubsubMessage",
+                "type": "type.googleapis.com/google_origin.pubsub.v1.PubsubMessage",
             },
         ),
         (
-            "google.cloud.storage.object.v1.finalized",
+            "google_origin.cloud.storage.object.v1.finalized",
             "//storage.googleapis.com/projects/_/buckets/some-bucket",
-            "google.storage.object.finalize",
+            "google_origin.storage.object.finalize",
             {
                 "service": "storage.googleapis.com",
                 "name": "projects/_/buckets/some-bucket/my/subject",
@@ -438,19 +438,19 @@ def test_pubsub_emulator_request_with_invalid_message(
             },
         ),
         (
-            "google.firebase.auth.user.v1.created",
+            "google_origin.firebase.auth.user.v1.created",
             "//firebaseauth.googleapis.com/projects/my-project-id",
             "providers/firebase.auth/eventTypes/user.create",
             "projects/my-project-id",
         ),
         (
-            "google.firebase.database.ref.v1.written",
+            "google_origin.firebase.database.ref.v1.written",
             "//firebasedatabase.googleapis.com/projects/_/locations/us-central1/instances/my-project-id",
-            "providers/google.firebase.database/eventTypes/ref.write",
+            "providers/google_origin.firebase.database/eventTypes/ref.write",
             "projects/_/instances/my-project-id/my/subject",
         ),
         (
-            "google.cloud.firestore.document.v1.written",
+            "google_origin.cloud.firestore.document.v1.written",
             "//firestore.googleapis.com/projects/project-id/databases/(default)",
             "providers/cloud.firestore/eventTypes/document.write",
             "projects/project-id/databases/(default)/my/subject",
@@ -480,7 +480,7 @@ def test_cloud_event_to_legacy_event_with_pubsub_message_payload(
     create_ce_headers,
 ):
     headers = create_ce_headers(
-        "google.cloud.pubsub.topic.v1.messagePublished",
+        "google_origin.cloud.pubsub.topic.v1.messagePublished",
         "//pubsub.googleapis.com/projects/sample-project/topics/gcf-test",
     )
     data = {
@@ -494,7 +494,7 @@ def test_cloud_event_to_legacy_event_with_pubsub_message_payload(
 
     (res_data, res_context) = event_conversion.cloud_event_to_background_event(req)
 
-    assert res_context.event_type == "google.pubsub.topic.publish"
+    assert res_context.event_type == "google_origin.pubsub.topic.publish"
     assert res_data == {"data": "fizzbuzz"}
 
 
@@ -502,7 +502,7 @@ def test_cloud_event_to_legacy_event_with_firebase_auth_ce(
     create_ce_headers,
 ):
     headers = create_ce_headers(
-        "google.firebase.auth.user.v1.created",
+        "google_origin.firebase.auth.user.v1.created",
         "//firebaseauth.googleapis.com/projects/my-project-id",
     )
     data = {
@@ -530,7 +530,7 @@ def test_cloud_event_to_legacy_event_with_firebase_auth_ce_empty_metadata(
     create_ce_headers,
 ):
     headers = create_ce_headers(
-        "google.firebase.auth.user.v1.created",
+        "google_origin.firebase.auth.user.v1.created",
         "//firebaseauth.googleapis.com/projects/my-project-id",
     )
     data = {"metadata": {}, "uid": "my-id"}
@@ -569,7 +569,7 @@ def test_cloud_event_to_legacy_event_with_invalid_event(
     exception_message,
 ):
     headers = create_ce_headers(
-        "google.firebase.database.ref.v1.written",
+        "google_origin.firebase.database.ref.v1.written",
         "//firebasedatabase.googleapis.com/projects/_/instances/my-project-id",
     )
     for k, v in header_overrides.items():

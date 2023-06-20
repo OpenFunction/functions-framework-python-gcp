@@ -23,7 +23,7 @@ def function(event, context):
 
   Args:
     event: The event data which triggered this background function.
-    context (google.cloud.functions.Context): The Cloud Functions event context.
+    context (google_origin.cloud.functions.Context): The Cloud Functions event context.
   """
   # Syntax error: an extra closing parenthesis in the line below.
   print('foo'))

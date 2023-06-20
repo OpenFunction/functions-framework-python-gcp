@@ -6,7 +6,7 @@ import time
 import pytest
 
 from functions_framework import create_app
-from openfunction.function_context import FunctionContext
+from functions_framework.openfunction import FunctionContext
 
 TEST_FUNCTIONS_DIR = pathlib.Path(__file__).resolve().parent / "test_functions"
 TEST_RESPONSE = "Hello world!"
