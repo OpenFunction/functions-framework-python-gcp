@@ -35,3 +35,13 @@ class MissingTargetException(FunctionsFrameworkException):
 
 class EventConversionException(FunctionsFrameworkException):
     pass
+
+
+def exception_handler(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            return f"An error occurred: {e}"
+
+    return wrapper
