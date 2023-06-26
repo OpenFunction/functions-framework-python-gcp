@@ -11,29 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from functions_framework.context.function_context import FunctionContext, OpenFunctionTrigger
+from functions_framework.context.function_context import FunctionContext, Component
 
 
 class RuntimeContext(object):
     """Context for runtime."""
 
-    def __int__(self, context: FunctionContext = None):
+    def __int__(self, context: FunctionContext = None, logger=None):
         self.context = context
-        self.request = None
+        self.logger = logger
 
-    def has_dapr_trigger(self):
-        """Check if the function has dapr trigger."""
-        return self.context and self.context.dapr_triggers
+    def __init_logger(self):
+        if self.logger:
+            self.logger.name = __name__
 
     def has_http_trigger(self):
         """Check if the function has http trigger."""
         return self.context and self.context.http_trigger
 
-    def get_dapr_triggers(self) -> [OpenFunctionTrigger]:
-        """Get dapr triggers."""
-        triggers = []
-        for trigger in self.context.dapr_triggers:
-            triggers.append(
-                OpenFunctionTrigger(name=trigger.get('name'), topic=trigger.get('topic'), component_type=trigger.get('type'))
-            )
-        return triggers
+    def get_dapr_triggers(self):
+        """Get dapr trigger."""
+        if self.context:
+            return self.context.dapr_triggers
+        else:
+            return []
+
+    def get_outputs(self) -> [Component]:
+        if self.context and self.context.outputs:
+            return self.context.outputs
+        else:
+            return [Component]

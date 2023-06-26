@@ -1,13 +1,22 @@
-OPEN_FUNC_BINDING = "bindings"
-OPEN_FUNC_TOPIC = "pubsub"
-
-KNATIVE_RUNTIME_TYPE = "knative"
-ASYNC_RUNTIME_TYPE = "async"
+# Copyright 2023 The OpenFunction Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+from functions_framework.constants import DAPR_BINDING_TYPE, DAPR_PUBSUB_TYPE
 
 
 class FunctionContext(object):
     """OpenFunction's serving context."""
-    
+
     def __init__(self, name="", version="", dapr_triggers=None, http_trigger=None,
                  inputs=None, outputs=None, states=None,
                  pre_hooks=None, post_hooks=None, tracing=None, port=8080):
@@ -29,7 +38,7 @@ class FunctionContext(object):
         version = json_dct.get('version')
         inputs_list = json_dct.get('inputs')
         outputs_list = json_dct.get('outputs')
-        dapr_triggers = json_dct.get('triggers', {}).get('dapr', [])
+        _dapr_triggers = json_dct.get('triggers', {}).get('dapr', [])
         http_trigger = json_dct.get('triggers', {}).get('http', None)
         states = json_dct.get('states', {})
         pre_hooks = json_dct.get('pre_hooks', [])
@@ -49,6 +58,11 @@ class FunctionContext(object):
             for k, v in outputs_list.items():
                 output = Component.from_json(v)
                 outputs[k] = output
+
+        dapr_triggers = [DaprTrigger]
+        for trigger in _dapr_triggers:
+            dapr_triggers.append(DaprTrigger.from_json(trigger))
+
         return FunctionContext(name, version, dapr_triggers, http_trigger,
                                inputs, outputs, states, pre_hooks, post_hooks, tracing)
 
@@ -56,10 +70,10 @@ class FunctionContext(object):
 class Component(object):
     """Components for inputs and outputs."""
 
-    def __init__(self, uri="", componentName="", componentType="", metadata=None, operation=""):
-        self.uri = uri
-        self.component_name = componentName
-        self.component_type = componentType
+    def __init__(self, component_name="", component_type="", topic="", metadata=None, operation=""):
+        self.topic = topic
+        self.component_name = component_name
+        self.component_type = component_type
         self.metadata = metadata
         self.operation = operation
 
@@ -67,40 +81,47 @@ class Component(object):
         type_split = self.component_type.split(".")
         if len(type_split) > 1:
             t = type_split[0]
-        if t == OPEN_FUNC_BINDING or t == OPEN_FUNC_TOPIC:
-            return t
+            if t == DAPR_BINDING_TYPE or t == DAPR_PUBSUB_TYPE:
+                return t
 
         return ""
 
     def __str__(self):
-        return "{uri: %s, component_name: %s, component_type: %s, operation: %s, metadata: %s}" % (
-            self.uri,
+        return "{component_name: %s, component_type: %s, topic: %s, metadata: %s, operation: %s}" % (
             self.component_name,
             self.component_type,
-            self.operation,
-            self.metadata
+            self.topic,
+            self.metadata,
+            self.operation
         )
 
     @staticmethod
     def from_json(json_dct):
-        uri = json_dct.get('uri', '')
+        topic = json_dct.get('topic', '')
         component_name = json_dct.get('componentName', '')
         metadata = json_dct.get('metadata')
         component_type = json_dct.get('componentType', '')
         operation = json_dct.get('operation', '')
-        return Component(uri, component_name, component_type, metadata, operation)
+        return Component(component_name, component_type, topic, metadata, operation)
 
 
-class OpenFunctionTrigger(object):
+class DaprTrigger(object):
 
     def __init__(self, name, component_type, topic):
         self.name = name
         self.component_type = component_type
         self.topic = topic
 
+    def __str__(self):
+        return "{name: %s, component_type: %s, topic: %s}" % (
+            self.name,
+            self.component_type,
+            self.topic
+        )
+
     @staticmethod
     def from_json(json_dct):
         name = json_dct.get('name', '')
         component_type = json_dct.get('type', '')
         topic = json_dct.get('topic')
-        return OpenFunctionTrigger(name, component_type, topic)
+        return DaprTrigger(name, component_type, topic)

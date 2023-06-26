@@ -1,11 +1,13 @@
+import logging
 import os
 from dapr.ext.grpc import App
 
 from functions_framework import _function_registry
+from functions_framework import log
 from functions_framework.exceptions import MissingSourceException
 from functions_framework.context.function_context import FunctionContext
 from functions_framework.context.runtime_context import RuntimeContext
-from functions_framework.triggers.dapr_trigger.dapr import DaprTrigger
+from functions_framework.triggers.dapr_trigger.dapr import DaprTriggerHandler
 
 
 class Runner:
@@ -17,6 +19,11 @@ class Runner:
         self.user_function = None
         self.request = None
         self.app = App()
+        self.host = host
+        self.port = port
+        self.debug = debug
+        self.dry_run = dry_run
+        self.logger = None
         self.load_user_function()
 
     def load_user_function(self):
@@ -35,21 +42,19 @@ class Runner:
 
         self.user_function = _function_registry.get_user_function(_source, source_module, _target)
 
-    def invoke_user_function(self, request):
-        self.request = request
-        if self.user_function:
-            output_data = self.user_function(self)
-            return output_data
-        else:
-            raise ValueError("User function is not loaded.")
+    def init_logger(self):
+        level = logging.INFO
+        if self.debug:
+            level = logging.DEBUG
+        self.logger = log.initialize_logger(__name__, level)
 
     def run(self):
-        runtime_context = RuntimeContext()
-        runtime_context.context = self.context
+        # convert to runtime context
+        runtime_context = RuntimeContext().__int__(self.context, self.logger)
 
-        if runtime_context.has_dapr_trigger():
-            _triggers = runtime_context.get_dapr_triggers()
-            dapr_trigger = DaprTrigger(self.context.port, self.app, _triggers, self.user_function)
+        _triggers = runtime_context.get_dapr_triggers()
+        if _triggers:
+            dapr_trigger = DaprTriggerHandler(self.context.port, self.app, _triggers, self.user_function)
             dapr_trigger.start(runtime_context)
 
-        self.app.run(50055)
+        self.app.run(self.port)
