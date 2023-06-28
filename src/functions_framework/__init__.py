@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2023 The OpenFunction Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import io
 import json
 import logging
@@ -20,13 +19,13 @@ import sys
 import flask
 
 from cloudevents.http import from_http
-from functions_framework.runner import Runner
 
 from functions_framework.exceptions import (
     EventConversionException,
     FunctionsFrameworkException,
 )
 from functions_framework.openfunction import dapr_output_middleware
+from functions_framework.runner import Runner
 
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024
 

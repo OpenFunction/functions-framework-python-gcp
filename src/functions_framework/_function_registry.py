@@ -1,4 +1,4 @@
-# Copyright 2023 OpenFunction
+# Copyright 2023 The OpenFunction Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import importlib.util
+import json
 import os
 import sys
 import types
-import json
 
+from functions_framework.context.function_context import FunctionContext
 from functions_framework.exceptions import (
     InvalidConfigurationException,
     InvalidTargetTypeException,
     MissingTargetException,
 )
-
-from functions_framework.context.function_context import FunctionContext
 
 DEFAULT_SOURCE = os.path.realpath("./main.py")
 
