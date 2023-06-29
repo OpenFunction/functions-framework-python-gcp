@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import importlib.util
+import inspect
 import json
 import os
 import sys
 import types
 
 from functions_framework.context.function_context import FunctionContext
+from functions_framework.context.user_context import UserContext
 from functions_framework.exceptions import (
     InvalidConfigurationException,
+    InvalidFunctionSignatureException,
     InvalidTargetTypeException,
     MissingTargetException,
 )
@@ -35,6 +38,14 @@ BACKGROUNDEVENT_SIGNATURE_TYPE = "event"
 # REGISTRY_MAP stores the registered functions.
 # Keys are user function names, values are user function signature types.
 REGISTRY_MAP = {}
+
+
+# Default function signature rule.
+def __function_signature_rule__(context: UserContext):
+    pass
+
+
+FUNCTION_SIGNATURE_RULE = inspect.Signature(__function_signature_rule__())
 
 
 def get_user_function(source, source_module, target):
@@ -55,6 +66,15 @@ def get_user_function(source, source_module, target):
                 source=source, target=target, target_type=type(function)
             )
         )
+
+    if FUNCTION_SIGNATURE_RULE != inspect.Signature(function):
+        raise InvalidFunctionSignatureException(
+            "The function defined in file {source} as {target} needs to be of "
+            "function signature {signature}, but got {target_signature}".format(
+                source=source, target=target, signature=FUNCTION_SIGNATURE_RULE,
+                target_signature=inspect.Signature(function))
+        )
+
     return function
 
 

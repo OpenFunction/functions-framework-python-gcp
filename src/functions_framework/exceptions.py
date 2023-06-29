@@ -35,6 +35,10 @@ class EventConversionException(FunctionsFrameworkException):
     pass
 
 
+class InvalidFunctionSignatureException(FunctionsFrameworkException):
+    pass
+
+
 def exception_handler(func):
     def wrapper(*args, **kwargs):
         try:
