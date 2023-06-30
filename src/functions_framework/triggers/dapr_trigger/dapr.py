@@ -25,10 +25,11 @@ from functions_framework.triggers.trigger import TriggerHandler
 
 
 class DaprTriggerHandler(TriggerHandler):
-    def __init__(self, port, app: App = None, triggers: [DaprTrigger] = None, user_function=None):
+    """Handle dapr trigger."""
+    def __init__(self, port, triggers: [DaprTrigger] = None, user_function=None):
         self.port = port
         self.triggers = triggers
-        self.app = app
+        self.app = App()
         self.user_function = user_function
 
     def start(self, context: RuntimeContext, logger=None):
@@ -40,7 +41,7 @@ class DaprTriggerHandler(TriggerHandler):
                 @self.app.binding(trigger.name)
                 def binding_handler(request: BindingRequest):
                     rt_ctx = deepcopy(context)
-                    user_ctx = UserContext().__int__(runtime_context=rt_ctx, binding_request=request, logger=logger)
+                    user_ctx = UserContext(runtime_context=rt_ctx, binding_request=request, logger=logger)
                     logging.basicConfig(level=logging.DEBUG)
                     logging.info('Received Message : ' + request.text())
                     self.user_function(user_ctx)
@@ -49,7 +50,9 @@ class DaprTriggerHandler(TriggerHandler):
                 @self.app.subscribe(pubsub_name=trigger.name, topic=trigger.topic)
                 def topic_handler(event: v1.Event):
                     rt_ctx = deepcopy(context)
-                    user_ctx = UserContext().__int__(runtime_context=rt_ctx, topic_event=event, logger=logger)
+                    user_ctx = UserContext(runtime_context=rt_ctx, topic_event=event, logger=logger)
                     logging.basicConfig(level=logging.DEBUG)
                     logging.info('Received Message : ' + event.data.__str__())
                     self.user_function(user_ctx)
+
+        self.app.run(self.port)

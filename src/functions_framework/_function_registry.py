@@ -45,7 +45,7 @@ def __function_signature_rule__(context: UserContext):
     pass
 
 
-FUNCTION_SIGNATURE_RULE = inspect.Signature(__function_signature_rule__())
+FUNCTION_SIGNATURE_RULE = inspect.signature(__function_signature_rule__)
 
 
 def get_user_function(source, source_module, target):
@@ -67,12 +67,12 @@ def get_user_function(source, source_module, target):
             )
         )
 
-    if FUNCTION_SIGNATURE_RULE != inspect.Signature(function):
+    if FUNCTION_SIGNATURE_RULE != inspect.signature(function):
         raise InvalidFunctionSignatureException(
             "The function defined in file {source} as {target} needs to be of "
             "function signature {signature}, but got {target_signature}".format(
                 source=source, target=target, signature=FUNCTION_SIGNATURE_RULE,
-                target_signature=inspect.Signature(function))
+                target_signature=inspect.signature(function))
         )
 
     return function

@@ -21,6 +21,7 @@ from functions_framework.context.function_context import FunctionContext
 from functions_framework.context.runtime_context import RuntimeContext
 from functions_framework.exceptions import MissingSourceException
 from functions_framework.triggers.dapr_trigger.dapr import DaprTriggerHandler
+from functions_framework.triggers.http_trigger.http import HTTPTriggerHandler
 
 
 class Runner:
@@ -31,13 +32,13 @@ class Runner:
         self.context = context
         self.user_function = None
         self.request = None
-        self.app = App()
         self.host = host
         self.port = port
         self.debug = debug
         self.dry_run = dry_run
         self.logger = None
         self.load_user_function()
+        self.init_logger()
 
     def load_user_function(self):
         _target = _function_registry.get_function_target(self.target)
@@ -63,11 +64,14 @@ class Runner:
 
     def run(self):
         # convert to runtime context
-        runtime_context = RuntimeContext().__int__(self.context, self.logger)
+        runtime_context = RuntimeContext(self.context, self.logger)
+
+        _trigger = runtime_context.get_http_trigger()
+        if _trigger:
+            http_trigger = HTTPTriggerHandler(self.context.port, _trigger, self.source, self.target, self.user_function)
+            http_trigger.start(runtime_context, logger=self.logger)
 
         _triggers = runtime_context.get_dapr_triggers()
         if _triggers:
-            dapr_trigger = DaprTriggerHandler(self.context.port, self.app, _triggers, self.user_function)
-            dapr_trigger.start(runtime_context)
-
-        self.app.run(self.port)
+            dapr_trigger = DaprTriggerHandler(self.context.port, _triggers, self.user_function)
+            dapr_trigger.start(runtime_context, logger=self.logger)

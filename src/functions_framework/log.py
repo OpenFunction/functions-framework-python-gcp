@@ -46,9 +46,3 @@ def initialize_logger(name=None, level=logging.DEBUG):
 
 # initialize logger
 logger = initialize_logger(__name__, logging.INFO)
-
-# test logger
-logger.debug("This is a debug message")
-logger.info("This is an info message")
-logger.warning("This is a warning message")
-logger.error("This is an error message")

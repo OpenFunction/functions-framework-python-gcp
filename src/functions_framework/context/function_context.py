@@ -63,6 +63,8 @@ class FunctionContext(object):
         for trigger in _dapr_triggers:
             dapr_triggers.append(DaprTrigger.from_json(trigger))
 
+        http_trigger = HTTPRoute.from_json(http_trigger)
+
         return FunctionContext(name, version, dapr_triggers, http_trigger,
                                inputs, outputs, states, pre_hooks, post_hooks, tracing)
 
@@ -103,6 +105,29 @@ class Component(object):
         component_type = json_dct.get('componentType', '')
         operation = json_dct.get('operation', '')
         return Component(component_name, component_type, topic, metadata, operation)
+
+
+class HTTPRoute(object):
+    """HTTP route."""
+
+    def __init__(self, port="", hostname="", rules=None):
+        self.port = port
+        self.hostname = hostname
+        self.rules = rules
+
+    def __str__(self):
+        return "{port: %s, hostname: %s, rules: %s}" % (
+            self.port,
+            self.hostname,
+            self.rules
+        )
+
+    @staticmethod
+    def from_json(json_dct):
+        port = json_dct.get('port', '')
+        hostnames = json_dct.get('route', {}).get('hostnames', '')
+        rules = json_dct.get('route', {}).get('rules', [])
+        return HTTPRoute(port, hostnames, rules)
 
 
 class DaprTrigger(object):

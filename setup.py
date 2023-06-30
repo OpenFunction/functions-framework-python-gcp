@@ -52,11 +52,13 @@ setup(
         "grpcio==1.54.2",
         "flask>=1.0,<3.0",
         "click>=7.0,<9.0",
-        # "watchdog>=1.0.0,<2.0.0",
+        "uvicorn>=0.22.0",
         "gunicorn>=19.2.0,<21.0; platform_system!='Windows'",
         "cloudevents>=1.2.0,<2.0.0",
         "dapr>=1.10.0",
         "aiohttp==3.8.4",
+        "dapr-ext-grpc>=1.10.0",
+        "dapr-ext-fastapi>=1.10.0"
     ],
     entry_points={
         "console_scripts": [

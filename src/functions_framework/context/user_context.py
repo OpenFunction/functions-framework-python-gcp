@@ -25,14 +25,15 @@ from functions_framework.openfunction.function_out import FunctionOut
 class UserContext(object):
     """Context for user."""
 
-    def __int__(self, runtime_context: RuntimeContext = None,
-                binding_request=None, topic_event=None, logger=None):
+    def __init__(self, runtime_context: RuntimeContext = None,
+                binding_request=None, topic_event=None, http_request=None, logger=None):
         self.runtime_context = runtime_context
         self.logger = logger
         self.out = FunctionOut(0, None, "", {})
         self.dapr_client = None
         self.__binding_request = binding_request
         self.__topic_event = topic_event
+        self.__http_request = http_request
         self.__init_dapr_client()
 
     def __init_dapr_client(self):
@@ -48,6 +49,9 @@ class UserContext(object):
 
     def get_topic_event(self):
         return copy.deepcopy(self.__topic_event)
+
+    def get_http_request(self):
+        return self.__http_request
 
     @exception_handler
     def send(self, output_name, data):

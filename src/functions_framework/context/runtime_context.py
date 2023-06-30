@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from functions_framework.context.function_context import FunctionContext, Component
+from functions_framework.context.function_context import Component, FunctionContext
 
 
-class RuntimeContext(object):
+class RuntimeContext:
     """Context for runtime."""
 
-    def __int__(self, context: FunctionContext = None, logger=None):
+    def __init__(self, context: FunctionContext = None, logger=None):
         self.context = context
         self.logger = logger
 
@@ -35,6 +35,13 @@ class RuntimeContext(object):
             return self.context.dapr_triggers
         else:
             return []
+
+    def get_http_trigger(self):
+        """Get http trigger."""
+        if self.context:
+            return self.context.http_trigger
+        else:
+            return None
 
     def get_outputs(self) -> [Component]:
         if self.context and self.context.outputs:

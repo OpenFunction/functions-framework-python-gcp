@@ -1,4 +1,4 @@
-# Copyright 2023 The OpenFunction Authors.
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,3 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
+class FlaskApplication:
+    def __init__(self, app, host, port, debug, **options):
+        self.app = app
+        self.host = host
+        self.port = port
+        self.debug = debug
+        self.options = options
+
+    def run(self):
+        self.app.run(self.host, self.port, debug=self.debug, **self.options)
