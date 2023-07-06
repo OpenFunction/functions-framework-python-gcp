@@ -18,6 +18,7 @@ from copy import deepcopy
 from cloudevents.sdk.event import v1
 from dapr.ext.grpc import App, BindingRequest
 
+from functions_framework import constants
 from functions_framework.context.function_context import DaprTrigger
 from functions_framework.context.runtime_context import RuntimeContext
 from functions_framework.context.user_context import UserContext
@@ -31,6 +32,8 @@ class DaprTriggerHandler(TriggerHandler):
         self.triggers = triggers
         self.app = App()
         self.user_function = user_function
+        if self.port == 0:
+            self.port = constants.DEFAULT_DAPR_APP_PORT
 
     def start(self, context: RuntimeContext, logger=None):
         if not self.triggers:

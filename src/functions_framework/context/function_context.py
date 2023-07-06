@@ -19,7 +19,7 @@ class FunctionContext(object):
 
     def __init__(self, name="", version="", dapr_triggers=None, http_trigger=None,
                  inputs=None, outputs=None, states=None,
-                 pre_hooks=None, post_hooks=None, tracing=None, port=8080):
+                 pre_hooks=None, post_hooks=None, tracing=None, port=0):
         self.name = name
         self.version = version
         self.dapr_triggers = dapr_triggers
@@ -44,6 +44,7 @@ class FunctionContext(object):
         pre_hooks = json_dct.get('pre_hooks', [])
         post_hooks = json_dct.get('post_hooks', [])
         tracing = json_dct.get('tracing', {})
+        port = json_dct.get('port', 0)
 
         inputs = None
         if inputs_list:
@@ -59,14 +60,15 @@ class FunctionContext(object):
                 output = Component.from_json(v)
                 outputs[k] = output
 
-        dapr_triggers = [DaprTrigger]
+        dapr_triggers = []
         for trigger in _dapr_triggers:
             dapr_triggers.append(DaprTrigger.from_json(trigger))
 
-        http_trigger = HTTPRoute.from_json(http_trigger)
+        if http_trigger:
+            http_trigger = HTTPRoute.from_json(http_trigger)
 
         return FunctionContext(name, version, dapr_triggers, http_trigger,
-                               inputs, outputs, states, pre_hooks, post_hooks, tracing)
+                               inputs, outputs, states, pre_hooks, post_hooks, tracing, port)
 
 
 class Component(object):

@@ -32,7 +32,7 @@ class HTTPTriggerHandler(TriggerHandler):
         self.route_rules = trigger.rules
         self.user_function = user_function
         self.debug = debug
-        if self.port is None:
+        if self.port == 0:
             self.port = constants.DEFAULT_HTTP_APP_PORT
 
     def start(self, context: RuntimeContext, logger=None):

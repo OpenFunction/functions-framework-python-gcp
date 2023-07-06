@@ -11,7 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from functions_framework.context.function_context import Component, FunctionContext
+from functions_framework.context.function_context import (
+    Component,
+    DaprTrigger,
+    FunctionContext,
+    HTTPRoute,
+)
 
 
 class RuntimeContext:
@@ -29,14 +34,14 @@ class RuntimeContext:
         """Check if the function has http trigger."""
         return self.context and self.context.http_trigger
 
-    def get_dapr_triggers(self):
+    def get_dapr_triggers(self) -> [DaprTrigger]:
         """Get dapr trigger."""
         if self.context:
             return self.context.dapr_triggers
         else:
             return []
 
-    def get_http_trigger(self):
+    def get_http_trigger(self) -> HTTPRoute:
         """Get http trigger."""
         if self.context:
             return self.context.http_trigger
@@ -47,4 +52,4 @@ class RuntimeContext:
         if self.context and self.context.outputs:
             return self.context.outputs
         else:
-            return [Component]
+            return []
