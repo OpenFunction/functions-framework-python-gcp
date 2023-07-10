@@ -36,8 +36,8 @@ class FunctionContext(object):
     def from_json(json_dct):
         name = json_dct.get('name')
         version = json_dct.get('version')
-        inputs_list = json_dct.get('inputs')
-        outputs_list = json_dct.get('outputs')
+        inputs_map = json_dct.get('inputs')
+        outputs_map = json_dct.get('outputs')
         _dapr_triggers = json_dct.get('triggers', {}).get('dapr', [])
         http_trigger = json_dct.get('triggers', {}).get('http', None)
         states = json_dct.get('states', {})
@@ -47,16 +47,16 @@ class FunctionContext(object):
         port = json_dct.get('port', 0)
 
         inputs = None
-        if inputs_list:
+        if inputs_map:
             inputs = {}
-            for k, v in inputs_list.items():
-                input = Component.from_json(v)
-                inputs[k] = input
+            for k, v in inputs_map.items():
+                _input = Component.from_json(v)
+                inputs[k] = _input
 
         outputs = None
-        if outputs_list:
+        if outputs_map:
             outputs = {}
-            for k, v in outputs_list.items():
+            for k, v in outputs_map.items():
                 output = Component.from_json(v)
                 outputs[k] = output
 
@@ -112,24 +112,18 @@ class Component(object):
 class HTTPRoute(object):
     """HTTP route."""
 
-    def __init__(self, port="", hostname="", rules=None):
+    def __init__(self, port=""):
         self.port = port
-        self.hostname = hostname
-        self.rules = rules
 
     def __str__(self):
-        return "{port: %s, hostname: %s, rules: %s}" % (
-            self.port,
-            self.hostname,
-            self.rules
+        return "{port: %s}" % (
+            self.port
         )
 
     @staticmethod
     def from_json(json_dct):
         port = json_dct.get('port', '')
-        hostnames = json_dct.get('route', {}).get('hostnames', '')
-        rules = json_dct.get('route', {}).get('rules', [])
-        return HTTPRoute(port, hostnames, rules)
+        return HTTPRoute(port)
 
 
 class DaprTrigger(object):

@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
-
 from copy import deepcopy
 
 from cloudevents.sdk.event import v1
@@ -45,8 +43,6 @@ class DaprTriggerHandler(TriggerHandler):
                 def binding_handler(request: BindingRequest):
                     rt_ctx = deepcopy(context)
                     user_ctx = UserContext(runtime_context=rt_ctx, binding_request=request, logger=logger)
-                    logging.basicConfig(level=logging.DEBUG)
-                    logging.info('Received Message : ' + request.text())
                     self.user_function(user_ctx)
 
             if trigger.component_type.startswith("pubsub"):
@@ -54,8 +50,6 @@ class DaprTriggerHandler(TriggerHandler):
                 def topic_handler(event: v1.Event):
                     rt_ctx = deepcopy(context)
                     user_ctx = UserContext(runtime_context=rt_ctx, topic_event=event, logger=logger)
-                    logging.basicConfig(level=logging.DEBUG)
-                    logging.info('Received Message : ' + event.data.__str__())
                     self.user_function(user_ctx)
 
         self.app.run(self.port)
