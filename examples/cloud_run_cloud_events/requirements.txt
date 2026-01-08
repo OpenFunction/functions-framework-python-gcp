@@ -1,3 +1,4 @@
 # Optionally include additional dependencies here
 cloudevents>=1.2.0
 requests
+urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
